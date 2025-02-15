@@ -1,17 +1,59 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import logo from "../assets/logo.svg";
 import { MdOutlineAccountCircle } from "react-icons/md";
 import { MdOutlineEmail } from "react-icons/md";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
+import { AppContext } from "../context/AppContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
+
+  const { backendUrl, setIsLoggedIn } = useContext(AppContext);
 
   const [state, setState] = useState("Sign Up");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const onSubmitHandler = async (e) => {
+    try {
+      e.preventDefault();
+
+      axios.defaults.withCredentials = true;
+
+      if (state === "Sign Up") {
+        const { data } = await axios.post(`${backendUrl}/api/auth/register`, {
+          name,
+          email,
+          password,
+        });
+
+        if (data?.success) {
+          setIsLoggedIn(true);
+          navigate("/");
+        } else {
+          toast.error(data?.message || "Failed to authenticate");
+        }
+      } else {
+        const { data } = await axios.post(`${backendUrl}/api/auth/login`, {
+          email,
+          password,
+        });
+
+        if (data?.success) {
+          setIsLoggedIn(true);
+          navigate("/");
+        } else {
+          toast.error(data?.message || "Failed to authenticate");
+        }
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400">
@@ -19,7 +61,7 @@ const Login = () => {
         onClick={() => navigate("/")}
         src={logo}
         alt="Logo"
-        className="absolute left-5 sm:left-20 top-5 w-28 sm:2-32 cursor-pointer sm:w-16"
+        className="absolute left-5 sm:left-20 top-5 w-28 cursor-pointer sm:w-16"
       />
       <div className="bg-slate-900 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm">
         <h2 className="text-3xl font-semibold text-white text-center mb-3">
@@ -32,7 +74,7 @@ const Login = () => {
             : "Login with your email"}
         </p>
 
-        <form>
+        <form onSubmit={onSubmitHandler}>
           {state === "Sign Up" && (
             <div className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
               <MdOutlineAccountCircle className="w-5 h-5" />
