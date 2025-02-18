@@ -11,47 +11,54 @@ import { toast } from "react-toastify";
 const Login = () => {
   const navigate = useNavigate();
 
-  const { backendUrl, setIsLoggedIn } = useContext(AppContext);
+  const { backendUrl, setIsLoggedIn, getUserData } = useContext(AppContext);
 
-  const [state, setState] = useState("Sign Up");
+  const [authMode, setAuthMode] = useState("Sign Up");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const onSubmitHandler = async (e) => {
+    e.preventDefault();
+
+    if (!backendUrl) {
+      return toast.error("Backend URL is missing.");
+    }
+
+    if (authMode === "Sign Up" && !name.trim()) {
+      return toast.error("Name is required");
+    }
+    if (!email.trim() || !password.trim()) {
+      return toast.error("Email and password are required");
+    }
+
     try {
-      e.preventDefault();
+      const endpoint =
+        authMode === "Sign Up"
+          ? `${backendUrl}/api/auth/register`
+          : `${backendUrl}/api/auth/login`;
 
-      axios.defaults.withCredentials = true;
+      const payload =
+        authMode === "Sign Up"
+          ? { name, email, password }
+          : { email, password };
 
-      if (state === "Sign Up") {
-        const { data } = await axios.post(`${backendUrl}/api/auth/register`, {
-          name,
-          email,
-          password,
-        });
+      const { data } = await axios.post(endpoint, payload, {
+        withCredentials: true,
+      });
 
-        if (data?.success) {
-          setIsLoggedIn(true);
-          navigate("/");
-        } else {
-          toast.error(data?.message || "Failed to authenticate");
-        }
+      if (data?.success) {
+        setIsLoggedIn(true);
+        getUserData();
+        navigate("/");
       } else {
-        const { data } = await axios.post(`${backendUrl}/api/auth/login`, {
-          email,
-          password,
-        });
-
-        if (data?.success) {
-          setIsLoggedIn(true);
-          navigate("/");
-        } else {
-          toast.error(data?.message || "Failed to authenticate");
-        }
+        toast.error(data?.message || "Failed to authenticate");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      console.error(error);
+      toast.error(
+        error.response?.data?.message || error.message || "Something went wrong"
+      );
     }
   };
 
@@ -65,17 +72,17 @@ const Login = () => {
       />
       <div className="bg-slate-900 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm">
         <h2 className="text-3xl font-semibold text-white text-center mb-3">
-          {state === "Sign Up" ? "Create an Account" : "Login"}
+          {authMode === "Sign Up" ? "Create an Account" : "Login"}
         </h2>
 
         <p className="text-center text-sm mb-6">
-          {state === "Sign Up"
+          {authMode === "Sign Up"
             ? "Sign up with your email"
             : "Login with your email"}
         </p>
 
         <form onSubmit={onSubmitHandler}>
-          {state === "Sign Up" && (
+          {authMode === "Sign Up" && (
             <div className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
               <MdOutlineAccountCircle className="w-5 h-5" />
               <input
@@ -119,26 +126,26 @@ const Login = () => {
             Forgot Password?
           </p>
           <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium cursor-pointer">
-            {state}
+            {authMode}
           </button>
         </form>
 
-        {state === "Sign Up" ? (
-          <p className="text-gray-400 text-center text-xm mt-4">
+        {authMode === "Sign Up" ? (
+          <p className="text-gray-400 text-center text-sm mt-4">
             Already have an account?{" "}
             <span
               className="text-blue-400 cursor-pointer underline"
-              onClick={() => setState("Login")}
+              onClick={() => setAuthMode("Login")}
             >
               Login here
             </span>
           </p>
         ) : (
-          <p className="text-gray-400 text-center text-xm mt-4">
+          <p className="text-gray-400 text-center text-sm mt-4">
             Don&apos;t have an account?{" "}
             <span
               className="text-blue-400 cursor-pointer underline"
-              onClick={() => setState("Sign Up")}
+              onClick={() => setAuthMode("Sign Up")}
             >
               Sign up here
             </span>
