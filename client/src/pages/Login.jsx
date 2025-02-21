@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 const Login = () => {
   const navigate = useNavigate();
 
-  const { backendUrl, setIsLoggedIn, getUserData } = useContext(AppContext);
+  const { backendUrl, setIsLoggedIn } = useContext(AppContext);
 
   const [authMode, setAuthMode] = useState("Sign Up");
   const [name, setName] = useState("");
@@ -53,7 +53,7 @@ const Login = () => {
         }
       }
     } catch (error) {
-      toast.error(data.message);
+      toast.error(error.message);
     }
   };
 

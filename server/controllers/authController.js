@@ -103,9 +103,13 @@ export const logout = (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
     });
 
-    res.status(200).json({ message: "Logout successful" });
+    if (req.session) {
+      req.session.destroy();
+    }
+
+    res.status(200).json({ success: true, message: "Logout successful" });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -190,7 +194,9 @@ export const verifyEmail = async (req, res) => {
 // Check if user is authenticated
 export const isAuthenticated = async (req, res) => {
   try {
-    return res.status(200).json({ message: "User is authenticated" });
+    return res
+      .status(200)
+      .json({ success: true, message: "User is authenticated" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
