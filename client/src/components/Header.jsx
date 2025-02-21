@@ -15,7 +15,7 @@ const Header = () => {
       />
 
       <h1 className="flex items-center gap-2 text-xl sm:text-3xl font-medium mb-2">
-        Hey, I&apos;m {userData ? userData.name : "Badi"}.
+        Hey, {userData ? userData.name : "Badi"}!
         <img src={three} alt="Web Design" className="w-8 aspect-square" />
       </h1>
 

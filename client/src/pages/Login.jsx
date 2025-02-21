@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import logo from "../assets/logo.svg";
 import { MdOutlineAccountCircle } from "react-icons/md";
 import { MdOutlineEmail } from "react-icons/md";
@@ -19,46 +19,41 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   const onSubmitHandler = async (e) => {
-    e.preventDefault();
-
-    if (!backendUrl) {
-      return toast.error("Backend URL is missing.");
-    }
-
-    if (authMode === "Sign Up" && !name.trim()) {
-      return toast.error("Name is required");
-    }
-    if (!email.trim() || !password.trim()) {
-      return toast.error("Email and password are required");
-    }
-
     try {
-      const endpoint =
-        authMode === "Sign Up"
-          ? `${backendUrl}/api/auth/register`
-          : `${backendUrl}/api/auth/login`;
+      e.preventDefault();
 
-      const payload =
-        authMode === "Sign Up"
-          ? { name, email, password }
-          : { email, password };
+      axios.defaults.withCredentials = true;
 
-      const { data } = await axios.post(endpoint, payload, {
-        withCredentials: true,
-      });
+      if (authMode === "Sign Up") {
+        const { data } = await axios.post(`${backendUrl}/api/auth/register`, {
+          name,
+          email,
+          password,
+        });
 
-      if (data?.success) {
-        setIsLoggedIn(true);
-        getUserData();
-        navigate("/");
+        if (data.success) {
+          setIsLoggedIn(true);
+          navigate("/");
+          toast.success("Account created successfully!");
+        } else {
+          toast.error(data.message);
+        }
       } else {
-        toast.error(data?.message || "Failed to authenticate");
+        const { data } = await axios.post(`${backendUrl}/api/auth/login`, {
+          email,
+          password,
+        });
+
+        if (data.success) {
+          setIsLoggedIn(true);
+          navigate("/");
+          toast.success("Login successful!");
+        } else {
+          toast.error(data.message);
+        }
       }
     } catch (error) {
-      console.error(error);
-      toast.error(
-        error.response?.data?.message || error.message || "Something went wrong"
-      );
+      toast.error(data.message);
     }
   };
 
