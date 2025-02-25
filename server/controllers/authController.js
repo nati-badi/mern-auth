@@ -144,7 +144,9 @@ export const sendVerifyOtp = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.status(200).json({ message: "Verification email sent successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Verification email sent successfully" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -185,7 +187,9 @@ export const verifyEmail = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({ message: "Email verified successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Email verified successfully" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -237,7 +241,9 @@ export const sendResetOtp = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.status(200).json({ message: "Reset OTP sent successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Reset OTP sent successfully" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

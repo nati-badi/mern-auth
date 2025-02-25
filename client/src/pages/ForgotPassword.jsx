@@ -1,6 +1,6 @@
 import React from "react";
 
-const VerifyEmail = () => {
+const ResetPassword = () => {
   return (
     <div>
       <h1>Forgot Password</h1>
@@ -8,4 +8,4 @@ const VerifyEmail = () => {
   );
 };
 
-export default VerifyEmail;
+export default ResetPassword;
